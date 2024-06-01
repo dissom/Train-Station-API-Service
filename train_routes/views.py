@@ -98,10 +98,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         elif self.action == "retrieve":
             serializer = OrderDetailSerializer
         return serializer
-    
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
-
 
 
 # class TicketViewSet(viewsets.ModelViewSet):
