@@ -1,6 +1,15 @@
-from typing import Iterable
+import os
+import uuid
 from django.db import models
+from django.utils.text import slugify
 from train_service import settings
+
+
+def image_file_path(instance, filename):
+    _, extension = os.path.splitext(filename)
+    filename = f"{slugify(instance.name)}-{uuid.uuid4()}{extension}"
+
+    return os.path.join("uploads", "images", filename)
 
 
 class Station(models.Model):
@@ -10,7 +19,9 @@ class Station(models.Model):
 
     class Meta:
         verbose_name_plural = "stations"
-        ordering = ["name",]
+        ordering = [
+            "name",
+        ]
 
     def __str__(self) -> str:
         return self.name
@@ -31,11 +42,7 @@ class Route(models.Model):
 
     class Meta:
         verbose_name_plural = "routes"
-        indexes = [
-            models.Index(
-                fields=["source", "destination"]
-            )
-        ]
+        indexes = [models.Index(fields=["source", "destination"])]
 
     def __str__(self) -> str:
         return (
@@ -44,13 +51,12 @@ class Route(models.Model):
 
 
 class TrainType(models.Model):
-    name = models.CharField(
-        max_length=100,
-        unique=True
-    )
+    name = models.CharField(max_length=100, unique=True)
 
     class Meta:
-        ordering = ["name",]
+        ordering = [
+            "name",
+        ]
 
     def __str__(self) -> str:
         return self.name
@@ -65,6 +71,7 @@ class Train(models.Model):
         on_delete=models.CASCADE,
         related_name="trains",
     )
+    image = models.ImageField(null=True, upload_to=image_file_path)
 
     def __str__(self) -> str:
         return self.name
@@ -85,7 +92,9 @@ class Journey(models.Model):
     arrival_time = models.DateTimeField()
 
     class Meta:
-        ordering = ["id",]
+        ordering = [
+            "id",
+        ]
 
     def __str__(self) -> str:
         return f"{self.route} on {self.train.name}"
@@ -94,10 +103,7 @@ class Journey(models.Model):
 class Crew(models.Model):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
-    journeys = models.ManyToManyField(
-        Journey,
-        related_name="crew"
-    )
+    journeys = models.ManyToManyField(Journey, related_name="crew")
 
     @property
     def full_name(self):
@@ -115,7 +121,9 @@ class Order(models.Model):
     )
 
     class Meta:
-        ordering = ["-created_at",]
+        ordering = [
+            "-created_at",
+        ]
 
     def __str__(self):
         return f"Order {self.id} by {self.user.username}"
@@ -138,64 +146,35 @@ class Ticket(models.Model):
     class Meta:
         unique_together = ("journey", "seat")
 
-    # @staticmethod
-    # def validate_ticket(seat, cargo, train, error_to_raise):
-    #     for ticket_attr_value, ticket_attr_name, train_attr_name in [
-    #         (seat, "seat", "places_in_cargo"),
-    #         (cargo, "cargo", "cargo_num")
-    #     ]:
-    #         count_attrs = getattr(train, train_attr_name)
-    #         if not (1 <= ticket_attr_value <= count_attrs):
-    #             raise error_to_raise(
-    #                 {
-    #                     ticket_attr_name: f"{ticket_attr_name} "
-    #                     f"number must be in available range: "
-    #                     f"(1, {train_attr_name}): "
-    #                     f"(1, {count_attrs})"
-    #                 }
-    #             )
-
     @staticmethod
-    def validate_ticket(
-        seat,
-        cargo,
-        places_in_cargo,
-        cargo_num,
-        error_to_raise
-    ) -> None:
-        if not (1 <= seat <= places_in_cargo):
-            raise error_to_raise(
-                f"Seat must be in range [1, {places_in_cargo}], "
-                f"not {seat}"
-            )
-        if not (1 <= cargo <= cargo_num):
-            raise error_to_raise(
-                f"Cargo num should be not more then {cargo_num}"
-            )
+    def validate_ticket(seat, cargo, train, error_to_raise):
+        for ticket_attr_value, ticket_attr_name, train_attr_name in [
+            (seat, "seat", "places_in_cargo"),
+            (cargo, "cargo", "cargo_num"),
+        ]:
+            count_attrs = getattr(train, train_attr_name)
+            if not (1 <= ticket_attr_value <= count_attrs):
+                raise error_to_raise(
+                    {
+                        ticket_attr_name: f"{ticket_attr_name} "
+                        f"number must be in available range: "
+                        f"(1, {train_attr_name}): "
+                        f"(1, {count_attrs})"
+                    }
+                )
 
     def clean(self) -> None:
         Ticket.validate_ticket(
             self.seat,
             self.cargo,
-            self.journey.train.places_in_cargo,
-            self.journey.train.cargo_num,
+            self.journey.train,
             ValueError
         )
 
-    # def save(
-    #     self,
-    #     force_insert: bool = ...,
-    #     force_update: bool = ...,
-    #     using: str | None = ...,
-    #     update_fields: Iterable[str] | None = ...
-    # ) -> None:
-    #     self.full_clean()
-    #     return super(Ticket, self).save(
-    #         force_insert,
-    #         force_update,
-    #         using,
-    #         update_fields
-    #     )
+    def save(self, *args, **kwargs) -> None:
+        self.full_clean()
+        print(self)
+        return super(Ticket, self).save(*args, **kwargs)
 
     def __str__(self):
         return f"Ticket {self.id} for Journey {self.journey}"
