@@ -21,12 +21,21 @@ class StationSerializer(serializers.ModelSerializer):
 
 
 class RouteSerializer(serializers.ModelSerializer):
-    source = StationSerializer(many=False, read_only=False)
-    destination = StationSerializer(many=False, read_only=False)
 
     class Meta:
         model = Route
         fields = ("id", "source", "destination", "distance")
+
+
+class RouteForJourneySerializer(serializers.ModelSerializer):
+    destination = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field="name"
+    )
+
+    class Meta:
+        model = Route
+        fields = ("destination", "distance")
 
 
 class RouteDetailSerializer(RouteSerializer):
@@ -120,7 +129,7 @@ class JourneyDetailSerializer(serializers.ModelSerializer):
         read_only=True,
         slug_field="name"
     )
-    route = RouteSerializer()
+    route = RouteListSerializer(read_only=True)
     taken_places = serializers.IntegerField(
         read_only=True,
         source="tickets.count"
@@ -143,10 +152,8 @@ class JourneyListSerializer(serializers.ModelSerializer):
         read_only=True,
         slug_field="name"
     )
-    route = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field="distance"
-    )
+    route = RouteForJourneySerializer()
+
     tickets_available = serializers.IntegerField(
         read_only=True,
     )
@@ -212,6 +219,13 @@ class TicketListSerializer(TicketSerializer):
     )
 
 
+class TicketDetailSerializer(TicketSerializer):
+    journey = JourneyDetailSerializer(
+        many=False,
+        read_only=True,
+    )
+
+
 class OrderSerializer(serializers.ModelSerializer):
     tickets = TicketSerializer(
         many=True,
@@ -239,7 +253,7 @@ class OrderSerializer(serializers.ModelSerializer):
         return order
 
 
-class OrderListSerializer(OrderSerializer):
+class OrderListSerializer(serializers.ModelSerializer):
     tickets = TicketSerializer(read_only=True, many=True)
 
     class Meta:
@@ -252,4 +266,4 @@ class OrderListSerializer(OrderSerializer):
 
 
 class OrderDetailSerializer(OrderSerializer):
-    tickets = TicketListSerializer(read_only=True, many=True)
+    tickets = TicketDetailSerializer(read_only=True, many=True)
