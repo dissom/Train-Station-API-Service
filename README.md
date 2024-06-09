@@ -66,7 +66,12 @@ docker-compose up
 
 ## Demo
 
+### Models Diagram
+
 ![Models diagram](pictures/train_tation_diagram.png)
+
+### Screenshots
+
 ![Screenshot 1](pictures/1.png)
 ![Screenshot 2](pictures/2.png)
 ![Screenshot 3](pictures/3.png)
