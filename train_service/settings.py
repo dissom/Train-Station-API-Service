@@ -51,14 +51,14 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "drf_spectacular",
     "rest_framework",
-    # "debug_toolbar",
+    "debug_toolbar",
     "train_routes",
     "user",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    # "debug_toolbar.middleware.DebugToolbarMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
