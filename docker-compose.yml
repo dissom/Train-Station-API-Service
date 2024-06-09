@@ -1,5 +1,3 @@
-version: '1'
-
 services:
   app:
     image: dissom/py-train-station-api-service

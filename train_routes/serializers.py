@@ -116,8 +116,8 @@ class JourneySerializer(serializers.ModelSerializer):
         route = validated_data.pop("route")
         train = validated_data.pop("train")
         journey = Journey.objects.create(
-            train=train,
-            route=route,
+            train=train.id,
+            route=route.id,
             **validated_data
         )
 

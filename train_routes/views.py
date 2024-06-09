@@ -274,7 +274,6 @@ class OrderViewSet(viewsets.ModelViewSet):
         queryset = self.queryset.filter(user=self.request.user)
 
         orders_ids = self.request.query_params.get("orders_ids")
-        print(orders_ids)
         if orders_ids:
             orders_ids = _params_to_int(orders_ids)
             queryset = queryset.filter(id__in=orders_ids)
