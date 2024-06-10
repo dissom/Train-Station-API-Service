@@ -70,7 +70,8 @@ docker-compose up
 - Admin panel /admin/;
 - Documentation is located at "api/doc/swagger/" or "api/doc/redoc/";
 - Managing orders and tickets;
-- Creating station, routes, traiins with train-types, journeys, crew;
+- Creating station, routes, traiins with train-types, journeys, crew
+    only for admin users;
 - Filtering trains by types;
 - Filtering journeys by: train_name, departure_time, arrival_time;
 - Filtering crew by: train_name, journeys,departure_time, arrival_time;
