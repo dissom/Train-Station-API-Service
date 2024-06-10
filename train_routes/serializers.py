@@ -203,7 +203,6 @@ class TicketSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         data = super().validate(attrs)
-        print(data)
         Ticket.validate_ticket(
             attrs["seat"],
             attrs["cargo"],

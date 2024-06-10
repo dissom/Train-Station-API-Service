@@ -163,7 +163,8 @@ class Ticket(models.Model):
         Ticket.validate_ticket(
             self.seat,
             self.cargo,
-            self.journey.train,
+            self.journey.train.cargo_num,
+            self.journey.train.places_in_cargo,
             ValueError
         )
 

@@ -271,7 +271,7 @@ class AdminApiTest(APITestCase):
 
         response = self.client.get(
             JOURNEY_URL,
-            {"train_name": f"{journey_1.train}"}
+            {"train_names": f"{journey_1.train}"}
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)

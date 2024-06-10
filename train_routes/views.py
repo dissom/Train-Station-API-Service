@@ -70,10 +70,10 @@ class TrainViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Retrieve trains with filters"""
         queryset = self.queryset
-        types = self.request.query_params.get("types")
-
-        if types:
-            queryset = queryset.filter(train_type__name__icontains=types)
+        types_param = self.request.query_params.get("types")
+        if types_param:
+            types = types_param.split(",")
+            queryset = self.queryset.filter(train_type__name__in=types)
 
         return queryset
 
@@ -100,11 +100,12 @@ class TrainViewSet(viewsets.ModelViewSet):
     @extend_schema(
         parameters=[
             OpenApiParameter(
-                name="train types",
+                name="types",
                 type=OpenApiTypes.STR,
-                description=(
-                    "Filter by types (ex. ?types={type_name1}, {type_name2})"
-                )
+                description="Filter by type (ex. ?type={type_name1}, "
+                            "{type_name2})",
+                explode=False,
+                style="form",
             )
         ]
     )
@@ -120,10 +121,11 @@ class JourneyViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Retrieve journeys with filters"""
         queryset = self.queryset
+        train_names = self.request.query_params.get("train_names")
 
-        train_name = self.request.query_params.get("train_name")
-        if train_name:
-            queryset = queryset.filter(train__name__icontains=train_name)
+        if train_names:
+            train_names = train_names.split(",")
+            queryset = queryset.filter(train__name__in=train_names)
 
         departure = self.request.query_params.get("departure")
         if departure:
@@ -159,7 +161,7 @@ class JourneyViewSet(viewsets.ModelViewSet):
     @extend_schema(
         parameters=[
             OpenApiParameter(
-                name="journeys",
+                name="train_name",
                 type=OpenApiTypes.STR,
                 description="Filter journeys by train name "
                             "(ex. ?train_name={train_name1}, {train_name2}...)"
@@ -167,13 +169,13 @@ class JourneyViewSet(viewsets.ModelViewSet):
             OpenApiParameter(
                 name="departure",
                 type=OpenApiTypes.DATE,
-                description="Filter by departure date "
+                description="Filter journeys by departure date "
                             "(ex. ?departure=2024-06-29)"
             ),
             OpenApiParameter(
                 name="arrival",
                 type=OpenApiTypes.DATE,
-                description="Filter by arrival date "
+                description="Filter journeys by arrival date "
                             "(ex. ?departure=2024-06-29)"
             ),
         ]
